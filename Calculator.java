@@ -37,8 +37,6 @@ public class Calculator {
             }
         } catch (Exception e) {
             System.out.println("입력 형식이 올바르지 않습니다. 숫자와 연산자를 정확히 입력하세요.");
-        } finally {
-            sc.close();
         }
     }
 }
