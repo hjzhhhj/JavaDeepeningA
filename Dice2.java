@@ -65,5 +65,6 @@ public class Dice2 {
 				break;
 			}
 		}
+		sc.close();
 	}
 }
