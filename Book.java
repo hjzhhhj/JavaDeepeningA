@@ -1,104 +1,112 @@
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.*;
 
-public class Book extends JFrame {
-    private JTextField txtTitle, txtAuthor;
-    private DefaultTableModel tableModel;
-    private JTable table;
+public class Book {
+    private DefaultListModel<String> bookListModel;
+    private JList<String> bookList;
 
     public Book() {
-        setTitle("도서 관리 프로그램");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(700, 500);
-        setLocationRelativeTo(null);
+        JFrame frame = new JFrame("도서 관리 프로그램");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 400);
+        frame.setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
 
-        JPanel inputPanel = new JPanel(new GridLayout(3, 3, 10, 10));
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        inputPanel.add(new JLabel("책 제목:"));
-        txtTitle = new JTextField();
-        inputPanel.add(txtTitle);
-
-        JButton btnAdd = new JButton("추가");
-        inputPanel.add(btnAdd);
-
-        inputPanel.add(new JLabel("저자:"));
-        txtAuthor = new JTextField();
-        inputPanel.add(txtAuthor);
-
-        JButton btnClear = new JButton("초기화");
-        inputPanel.add(btnClear);
-
-        inputPanel.add(new JLabel());
-        JButton btnDelete = new JButton("선택 삭제");
-        inputPanel.add(btnDelete);
-
-        mainPanel.add(inputPanel, BorderLayout.NORTH);
-
-        tableModel = new DefaultTableModel(new Object[]{"책 제목", "저자"}, 0);
-        table = new JTable(tableModel);
-        JScrollPane scrollPane = new JScrollPane(table);
+        // 리스트 모델 및 리스트 초기화
+        bookListModel = new DefaultListModel<>();
+        bookList = new JList<>(bookListModel);
+        JScrollPane scrollPane = new JScrollPane(bookList);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        addInitialData();
+        // 버튼 패널
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 5, 5, 5));
+        JButton insertButton = new JButton("추가");
+        JButton searchAllButton = new JButton("전체 조회");
+        JButton selectOneButton = new JButton("선택 조회");
+        JButton updateButton = new JButton("수정");
+        JButton deleteButton = new JButton("삭제");
 
-        btnAdd.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String title = txtTitle.getText().trim();
-                String author = txtAuthor.getText().trim();
+        buttonPanel.add(insertButton);
+        buttonPanel.add(searchAllButton);
+        buttonPanel.add(selectOneButton);
+        buttonPanel.add(updateButton);
+        buttonPanel.add(deleteButton);
 
-                if (title.isEmpty() || author.isEmpty()) {
-                    JOptionPane.showMessageDialog(Book.this, "모든 필드를 입력하세요.", "오류", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    tableModel.addRow(new Object[]{title, author});
-                    txtTitle.setText("");
-                    txtAuthor.setText("");
-                }
-            }
-        });
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        btnClear.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                txtTitle.setText("");
-                txtAuthor.setText("");
-            }
-        });
+        // 버튼 동작 추가
+        insertButton.addActionListener(e -> insertB());
+        searchAllButton.addActionListener(e -> searchAll());
+        selectOneButton.addActionListener(e -> selectOne());
+        updateButton.addActionListener(e -> updateB());
+        deleteButton.addActionListener(e -> deleteB());
 
-        btnDelete.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int selectedRow = table.getSelectedRow();
-                if (selectedRow == -1) {
-                    JOptionPane.showMessageDialog(Book.this, "삭제할 행을 선택하세요.", "오류", JOptionPane.WARNING_MESSAGE);
-                } else {
-                    int confirm = JOptionPane.showConfirmDialog(Book.this, "선택된 책을 삭제하시겠습니까?", "확인", JOptionPane.YES_NO_OPTION);
-                    if (confirm == JOptionPane.YES_OPTION) {
-                        tableModel.removeRow(selectedRow);
-                    }
-                }
-            }
-        });
-
-        add(mainPanel);
+        frame.add(mainPanel);
+        frame.setVisible(true);
     }
 
-    private void addInitialData() {
-        tableModel.addRow(new Object[]{"자바 프로그래밍", "홍길동"});
-        tableModel.addRow(new Object[]{"파이썬 기초", "이몽룡"});
-        tableModel.addRow(new Object[]{"알고리즘", "성춘향"});
+    private void insertB() {
+        String book = JOptionPane.showInputDialog("추가할 책 제목을 입력하세요:");
+        if (book != null && !book.trim().isEmpty()) {
+            bookListModel.addElement(book.trim());
+            JOptionPane.showMessageDialog(null, "책이 추가되었습니다.");
+        } else {
+            JOptionPane.showMessageDialog(null, "책 제목을 입력하세요.", "오류", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void searchAll() {
+        if (bookListModel.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "등록된 책이 없습니다.", "알림", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            StringBuilder books = new StringBuilder("전체 책 목록:\n");
+            for (int i = 0; i < bookListModel.size(); i++) {
+                books.append(i + 1).append(". ").append(bookListModel.getElementAt(i)).append("\n");
+            }
+            JOptionPane.showMessageDialog(null, books.toString(), "전체 조회", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void selectOne() {
+        int selectedIndex = bookList.getSelectedIndex();
+        if (selectedIndex == -1) {
+            JOptionPane.showMessageDialog(null, "조회할 책을 선택하세요.", "오류", JOptionPane.ERROR_MESSAGE);
+        } else {
+            String selectedBook = bookListModel.getElementAt(selectedIndex);
+            JOptionPane.showMessageDialog(null, "선택된 책: " + selectedBook, "선택 조회", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void updateB() {
+        int selectedIndex = bookList.getSelectedIndex();
+        if (selectedIndex == -1) {
+            JOptionPane.showMessageDialog(null, "수정할 책을 선택하세요.", "오류", JOptionPane.ERROR_MESSAGE);
+        } else {
+            String updatedBook = JOptionPane.showInputDialog("새 책 제목을 입력하세요:", bookListModel.getElementAt(selectedIndex));
+            if (updatedBook != null && !updatedBook.trim().isEmpty()) {
+                bookListModel.setElementAt(updatedBook.trim(), selectedIndex);
+                JOptionPane.showMessageDialog(null, "책 정보가 수정되었습니다.");
+            } else {
+                JOptionPane.showMessageDialog(null, "유효한 책 제목을 입력하세요.", "오류", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void deleteB() {
+        int selectedIndex = bookList.getSelectedIndex();
+        if (selectedIndex == -1) {
+            JOptionPane.showMessageDialog(null, "삭제할 책을 선택하세요.", "오류", JOptionPane.ERROR_MESSAGE);
+        } else {
+            int confirm = JOptionPane.showConfirmDialog(null, "선택된 책을 삭제하시겠습니까?", "확인", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                bookListModel.removeElementAt(selectedIndex);
+                JOptionPane.showMessageDialog(null, "책이 삭제되었습니다.");
+            }
+        }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            Book app = new Book();
-            app.setVisible(true);
-        });
+        SwingUtilities.invokeLater(Book::new);
     }
 }
