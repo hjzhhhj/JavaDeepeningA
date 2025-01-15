@@ -1,3 +1,5 @@
+package InT2;
+
 import java.sql.*;
 
 public class JDBC_Ex1 {
